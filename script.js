@@ -390,3 +390,141 @@ document.addEventListener("DOMContentLoaded", function () {
     updateCartBadge();
     setupAddToCartButtons();
 });
+
+//Sales script
+const products = [
+    {
+        id: 'p1',
+        name: 'Sleek Ponytail - Brazilian Silk',
+        price: 85.00,
+        originalPrice: 120.00,
+        image: 'ponytail1.jpg', // Replace with your image paths
+        category: 'Ponytail'
+    },
+    {
+        id: 'p2',
+        name: 'Deep Wave Frontal Wig',
+        price: 250.00,
+        originalPrice: 310.00,
+        image: 'wig1.jpg',
+        category: 'Wig'
+    }
+];
+
+function displayProducts() {
+    const grid = document.getElementById('saleProducts');
+    grid.innerHTML = products.map(product => `
+        <div class="product-card">
+            <span class="sale-badge">SALE</span>
+            <img src="${product.image}" alt="${product.name}" class="product-image">
+            <h3>${product.name}</h3>
+            <p style="text-decoration: line-through; color: #888; font-size: 0.9rem;">$${product.originalPrice}</p>
+            <p style="color: #d4af37; font-weight: bold; font-size: 1.3rem;">$${product.price}</p>
+            ${product.category === 'Ponytail' ? '<p style="font-size: 0.7rem; color: #ef6c00;">+ FREE SCRUNCHIE INCLUDED</p>' : ''}
+            <button class="btn-add" onclick="addToCart('${product.id}')">Add to Cart</button>
+        </div>
+    `).join('');
+}
+
+function addToCart(productId) {
+    const product = products.find(p => p.id === productId);
+    let cart = JSON.parse(localStorage.getItem('ellenLuxeCart')) || [];
+    
+    // Check if item already exists
+    const existing = cart.find(item => item.id === productId);
+    if(existing) {
+        existing.qty += 1;
+    } else {
+        cart.push({ ...product, qty: 1, length: "22" }); // Default length
+    }
+    
+    localStorage.setItem('ellenLuxeCart', JSON.stringify(cart));
+    updateCartCount();
+    alert(`${product.name} added to bag!`);
+}
+
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('ellenLuxeCart')) || [];
+    const count = cart.reduce((sum, item) => sum + item.qty, 0);
+    document.getElementById('cartCount').innerText = count;
+}
+
+window.onload = () => {
+    displayProducts();
+    updateCartCount();
+};
+
+
+//Sales script for adding to cart
+// Master Add to Cart Function
+function addToCart(id, name, price) {
+    let cart = JSON.parse(localStorage.getItem('ellenLuxeCart')) || [];
+    
+    // 1. Check if item is already in cart
+    const existingItem = cart.find(item => item.id === id);
+    
+    if (existingItem) {
+        existingItem.qty += 1;
+    } else {
+        cart.push({
+            id: id,
+            name: name,
+            price: price,
+            qty: 1,
+            length: "22" // Default luxury length
+        });
+    }
+    
+    // 2. Save back to LocalStorage
+    localStorage.setItem('ellenLuxeCart', JSON.stringify(cart));
+    
+    // 3. Update the Nav Bar Cart Count
+    updateCartCount();
+    
+    // 4. Handle Special Promo Notification
+    if (name.toLowerCase().includes('ponytail')) {
+        showPromoToast(); // Triggers the "Free Scrunchie" alert
+    }
+
+    // 5. Button Animation (Fancy Feedback)
+    const btn = event.target;
+    if (btn && btn.classList.contains('btn-add')) {
+        const originalText = btn.innerText;
+        btn.innerText = "Added to Bag! ✨";
+        btn.style.background = "#d4af37";
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.background = "#000";
+        }, 2000);
+    }
+}
+
+// Global Cart Counter
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('ellenLuxeCart')) || [];
+    const count = cart.reduce((sum, item) => sum + item.qty, 0);
+    const cartCountEl = document.getElementById('cartCount');
+    if (cartCountEl) {
+        cartCountEl.innerText = count;
+    }
+}
+
+// Promo Toast Logic
+function showPromoToast() {
+    const toast = document.getElementById('promo-toast');
+    if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
+    }
+}
+
+// Initialize on page load
+window.onload = () => {
+    // If you have a function to draw your products, call it here
+    if (typeof displayProducts === "function") {
+        displayProducts();
+    }
+    updateCartCount();
+};
