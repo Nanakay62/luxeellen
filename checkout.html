@@ -14,7 +14,7 @@
         <div class="header-container">
             <div class="logo">
                 <a href="index.html">
-                    <img src="C:\Users\nanak\OneDrive\Desktop\NII PROJECT\ELLEN LUXE LOGO.png" alt="Ellen Luxe Logo">
+                    <img src="ELLEN LUXE LOGO.png" alt="Ellen Luxe Logo">
                 </a>
             </div>
             <div class="checkout-step-indicator">
@@ -29,28 +29,37 @@
                 <form id="shipping-form">
                     <div class="form-group">
                         <h3>Contact Information</h3>
-                        <input type="email" placeholder="Email address" required>
+                        <input type="email" id="email" placeholder="Email address" required>
                     </div>
 
                     <div class="form-group">
                         <h3>Shipping Address</h3>
                         <div class="input-row">
-                            <input type="text" placeholder="First name" required>
-                            <input type="text" placeholder="Last name" required>
+                            <input type="text" id="fname" placeholder="First name" required>
+                            <input type="text" id="lname" placeholder="Last name" required>
                         </div>
-                        <input type="text" placeholder="Address" required>
-                        <input type="text" placeholder="Apartment, suite, etc. (optional)">
+                        <input type="text" id="address" placeholder="Address" required>
+                        <input type="text" id="apartment" placeholder="Apartment, suite, etc. (optional)">
                         <div class="input-row">
-                            <input type="text" placeholder="City" required>
-                            <input type="text" placeholder="Postal code" required>
+                            <input type="text" id="city" placeholder="City" required>
+                            <input type="text" id="zip" placeholder="Postal code" required>
                         </div>
                     </div>
 
-                    <div class="payment-trigger-section">
+                    <div class="payment-trigger-section" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
                         <h3>Payment</h3>
-                        <p>All transactions are secure and encrypted.</p>
+                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">Choose your preferred payment method below.</p>
+                        
                         <div id="paypal-button-container"></div>
-                        <a href="cart.html" class="back-to-cart-link">← Return to Shopping Cart</a>
+                        
+                        <p style="text-align: center; margin: 15px 0; color: #888; font-size: 0.8rem;">— OR —</p>
+                        
+                        <button type="button" onclick="processOrder('Pay on Delivery')" 
+                                style="width: 100%; padding: 15px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Montserrat'; transition: 0.3s;">
+                            Confirm Order (Pay on Delivery)
+                        </button>
+
+                        <a href="cart.html" class="back-to-cart-link" style="display: block; margin-top: 20px; text-align: center; font-size: 0.8rem; color: #666; text-decoration: none;">← Return to Shopping Cart</a>
                     </div>
                 </form>
             </section>
@@ -60,9 +69,13 @@
                     <h3>Your Order</h3>
                     <div id="checkout-items-list"></div>
                     
+                    <div id="promo-notice" style="display:none; background: #fff3e0; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; margin: 15px 0; font-size: 0.8rem;">
+                        ✨ <strong>Promo Applied:</strong> Free Silk Scrunchie included with your Ponytail!
+                    </div>
+
                     <div class="summary-totals">
                         <div class="line"><span>Subtotal</span> <span id="subtotal-val">$0.00</span></div>
-                        <div class="line"><span>Shipping</span> <span class="free-text">FREE</span></div>
+                        <div class="line"><span>Shipping</span> <span class="free-text" style="color: green; font-weight: 600;">FREE</span></div>
                         <div class="line total"><span>Total</span> <span id="total-val">$0.00</span></div>
                     </div>
                 </div>
@@ -71,62 +84,121 @@
     </main>
 
     <script>
-        const CART_KEY = "ellenLuxeCart";
-        let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    const CART_KEY = "ellenLuxeCart";
+    // 1. YOUR API URLS
+    const SHEET_BEST_URL = 'https://api.sheetbest.com/sheets/7695b621-65c6-4f5e-8b92-7c185bca7526'; 
+    const FORMSPREE_URL = 'https://formspree.io/f/mlgwrnej'; // 
 
-        function initCheckout() {
-            const list = document.getElementById('checkout-items-list');
-            const subtotalEl = document.getElementById('subtotal-val');
-            const totalEl = document.getElementById('total-val');
-            
-            let total = 0;
-            list.innerHTML = "";
+    let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    let totalAmount = 0;
 
-            if (cart.length === 0) {
-                list.innerHTML = "<p>Your cart is empty.</p>";
-                return;
-            }
+    function initCheckout() {
+        const list = document.getElementById('checkout-items-list');
+        const subtotalEl = document.getElementById('subtotal-val');
+        const totalEl = document.getElementById('total-val');
+        const promoNotice = document.getElementById('promo-notice');
+        
+        if (cart.length === 0) {
+            list.innerHTML = "<p>Your cart is empty.</p>";
+            return;
+        }
 
-            cart.forEach(item => {
-                total += item.price * item.qty;
-                list.innerHTML += `
-                    <div class="checkout-item">
-                        <div class="item-details">
-                            <p><strong>${item.name}</strong> x ${item.qty}</p>
-                            <span>${item.length}"</span>
-                        </div>
-                        <p>$${(item.price * item.qty).toFixed(2)}</p>
+        let hasPonytail = false;
+        list.innerHTML = "";
+        totalAmount = 0; // Reset to avoid double-counting on refresh
+
+        cart.forEach(item => {
+            totalAmount += item.price * item.qty;
+            if(item.name.toLowerCase().includes('ponytail')) hasPonytail = true;
+
+            list.innerHTML += `
+                <div class="checkout-item" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <div>
+                        <p style="margin:0;"><strong>${item.name}</strong> x ${item.qty}</p>
+                        <small>${item.length}"</small>
                     </div>
-                `;
+                    <p>$${(item.price * item.qty).toFixed(2)}</p>
+                </div>`;
+        });
+
+        if(hasPonytail) promoNotice.style.display = 'block';
+
+        subtotalEl.innerText = `$${totalAmount.toFixed(2)}`;
+        totalEl.innerText = `$${totalAmount.toFixed(2)}`;
+
+        // PayPal Config
+        paypal.Buttons({
+            createOrder: (data, actions) => {
+                return actions.order.create({
+                    purchase_units: [{ amount: { value: totalAmount.toFixed(2) } }]
+                });
+            },
+            onApprove: (data, actions) => {
+                return actions.order.capture().then(details => {
+                    processOrder('PayPal', details.id);
+                });
+            }
+        }).render('#paypal-button-container');
+    }
+
+    async function processOrder(method, transactionId = 'N/A') {
+        const email = document.getElementById('email').value;
+        const fname = document.getElementById('fname').value;
+        const address = document.getElementById('address').value;
+
+        if(!email || !fname || !address) {
+            alert("Please fill in your shipping details first.");
+            return;
+        }
+
+        let itemsString = cart.map(i => `${i.name} (${i.length}") x${i.qty}`).join(', ');
+        if(itemsString.toLowerCase().includes('ponytail')) {
+            itemsString += " + FREE SCRUNCHIE";
+        }
+
+        const orderData = {
+            date: new Date().toLocaleString(),
+            customerName: `${fname} ${document.getElementById('lname').value}`,
+            email: email,
+            address: `${address}, ${document.getElementById('apartment').value || ''}, ${document.getElementById('city').value}`,
+            items: itemsString,
+            totalAmount: `$${totalAmount.toFixed(2)}`,
+            paymentMethod: method,
+            status: 'Pending',
+            paypalId: transactionId
+        };
+
+        try {
+            // --- Parallel Task: Send to Sheet AND Formspree ---
+            const sheetPromise = fetch(SHEET_BEST_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify([orderData]) // Wrapped in [] for Sheet.best
             });
 
-            subtotalEl.innerText = `$${total.toFixed(2)}`;
-            totalEl.innerText = `$${total.toFixed(2)}`;
+            const emailPromise = fetch(FORMSPREE_URL, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
 
-            // PayPal Integration
-            paypal.Buttons({
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: { value: total.toFixed(2) }
-                        }]
-                    });
-                },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        alert('Transaction completed by ' + details.payer.name.given_name);
-                        localStorage.removeItem(CART_KEY);
-                        window.location.href = "success.html";
-                    });
-                },
-                onError: function(err) {
-                    console.error('PayPal Error:', err);
-                    alert('There was an error processing your payment.');
-                }
-            }).render('#paypal-button-container');
-        } // Function closure fixed here
+            // Wait for both to finish
+            const [sheetRes, emailRes] = await Promise.all([sheetPromise, emailPromise]);
 
-        window.onload = initCheckout;
-    </script>
+            if (sheetRes.ok || emailRes.ok) {
+                localStorage.removeItem(CART_KEY);
+                window.location.href = "success.html";
+            } else {
+                throw new Error("Both services failed");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Connection error. If you were charged, please contact us on Instagram @EllenLuxeHairs");
+        }
+    }
+
+    window.onload = initCheckout;
+</script>
 </body>
 </html>
