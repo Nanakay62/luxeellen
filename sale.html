@@ -41,11 +41,21 @@
                 </ul>
             </nav>
             <!-- Cart Button -->
-<div class="cart-icon">
-    <a href="cart.html">
-        🛒 Cart (<span id="cartCount">0</span>)
-    </a>
-</div>
+ <!--Cart Button-->
+            <div class="header-controls">
+                <a href="cart.html" class="cart-anchor">
+                    <div class="cart-icon-wrapper">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <span class="cart-counter" id="cartCount">0</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 
             <!-- Mobile Menu Toggle -->
             <button class="mobile-menu-toggle" id="mobileMenuToggle">
@@ -57,33 +67,64 @@
     </header>
 
     <!-- Main Content Section -->
-    <main class="page-content">
-        <div class="page-container">
-            <!-- Page Hero -->
-            <section class="page-hero">
-                <h1 class="page-title">Sale</h1>
-                <p class="page-subtitle">Discover our sale items</p>
-            </section>
-
-            <!-- Content Area - Add your content here -->
-            <section class="content-section">
-                <div class="content-wrapper">
-                    <h2>Welcome to Sale</h2>
-                    <p>On my way....</p>
-                    
-                    <!-- Example content structure you can use -->
-                    <div class="products-grid" style="margin-top: 3rem;">
-                        <div style="text-align: center; padding: 3rem; color: #666;">
-                            <p style="font-size: 1.1rem; margin-bottom: 1rem;">
-                                <strong>Will be here soon..</strong>
-                            </p>
-                            <p>Coming soooooonnn......</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+  <main class="page-content">
+        <div class="promo-ticker">
+            <div class="ticker-content">
+                ✨ LUXURY DEALS: BUY ANY PONYTAIL & GET A SILK SCRUNCHIE FREE! • LIMITED TIME OFFER • ✨
+            </div>
         </div>
+
+        <section class="content-section">
+    <div class="products-grid" id="saleProducts">
+        
+        <div class="product-card glow-pink">
+            <div class="scrunchie-badge">FREE GIFT</div>
+            <img src="kinkstrai.png" alt="Ponytail" class="product-image">
+            <div class="product-info">
+                <h3>Kinky Straight Ponytail</h3>
+                <p class="price"><span class="old-price">$120</span> $85.00</p>
+                <button class="btn-add" onclick="addToCart('p1', 'Kinky Straight Ponytail', 85.00)">Add to Bag</button>
+            </div>
+        </div>
+
+        <div class="product-card glow-blue">
+            <div class="scrunchie-badge">FREE GIFT</div>
+            <img src="kinkycurl.png" alt="Ponytail" class="product-image">
+            <div class="product-info">
+                <h3>Kinky Curly Ponytail</h3>
+                <p class="price"><span class="old-price">$110</span> $75.00</p>
+                <button class="btn-add" onclick="addToCart('p2', 'Kinky Curly Ponytail', 75.00)">Add to Bag</button>
+            </div>
+        </div>
+
+        <div class="product-card glow-purple">
+            <img src="bodywv.png" alt="Ponytail" class="product-image">
+            <div class="product-info">
+                <h3>Body Wave Ponytail</h3>
+                <p class="price"><span class="old-price">$350</span> $280.00</p>
+                <button class="btn-add" onclick="addToCart('p3', 'Body Wave Ponytail', 280.00)">Add to Bag</button>
+            </div>
+        </div>
+
+    </div>
+</section>
     </main>
+
+    <div class="floating-container">
+        <div class="float-item scrunchie-1"></div>
+        <div class="float-item hair-1"></div>
+        <div class="float-item scrunchie-2"></div>
+    </div>
+
+    <div id="promo-toast" class="promo-toast">
+    <div class="toast-content">
+        <span class="sparkle">✨</span>
+        <div class="toast-text">
+            <strong>Promo Applied!</strong>
+            <p>Free Silk Scrunchie included with your Ponytail!</p>
+        </div>
+    </div>
+</div>
 
     <!-- Footer -->
     <footer class="footer">
@@ -123,6 +164,7 @@
             <p>&copy; 2026 Ellen Luxe Hairs. All rights reserved.</p>
         </div>
     </footer>
+    
 
     <script src="script.js"></script>
 </body>
