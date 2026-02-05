@@ -13,16 +13,16 @@
         <div class="header-container">
             <div class="logo">
                 <a href="index.html">
-                    <img src="images/ELLEN LUXE LOGO.png" alt="Ellen Luxe Logo">
+                    <img src="ellen-luxe-logo.png" alt="Ellen Luxe Logo">
                 </a>
             </div>
             <nav class="main-nav">
                 <ul class="nav-list">
                     <li><a href="index.html">Home</a></li>
-                    <li><a href="hair-type.html">Hair Type</a></li>
+                    <li><a href="accessories.html">Accessories</a></li>
                     <li><a href="sale.html" class="sale-link">Sale</a></li>
                     <li><a href="policy.html">Policy</a></li>
-                    <li><a href="new.html">New</a></li>
+                    <li><a href="about.html">About</a></li>
                 </ul>
             </nav>
             <div class="header-controls">
@@ -177,6 +177,29 @@
             }
             window.location.href = "checkout.html";
         }
+        
+        function calculateCartTotal() {
+    let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    
+    // Check if there is at least one ponytail in the bag
+    const hasPonytail = cart.some(item => item.name.toLowerCase().includes('ponytail'));
+    
+    let subtotal = 0;
+
+    const updatedCart = cart.map(item => {
+        let priceToCharge = item.price;
+
+        // If it's a scrunchie and a ponytail is present, apply discount
+        if (item.name.toLowerCase().includes('scrunchie') && hasPonytail) {
+            priceToCharge = 1.50;
+        }
+
+        subtotal += priceToCharge * item.qty;
+        return { ...item, displayedPrice: priceToCharge }; 
+    });
+
+    return subtotal;
+}
 
         window.onload = renderCart;
     </script>
